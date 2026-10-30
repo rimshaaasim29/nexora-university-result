@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nexora University - Student Portal</title>
+<style>
+:root{
+  --navy:#0b3a75; --blue:#1e63b5; --sky:#e8f1fc; --bg1:#e6f0fd; --bg2:#f7faff;
+  --line:#dbe3ee; --text:#1d2433; --muted:#667085; --ok:#16794a; --bad:#c0392b; --gold:#c8962e;
+  --shadow:0 4px 18px rgba(11,58,117,.08);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--text);background:linear-gradient(180deg,var(--bg1),var(--bg2) 380px) fixed;min-height:100vh}
+.hidden{display:none!important}
+button{font-family:inherit;font-size:14px;cursor:pointer;border:0;border-radius:8px;padding:10px 18px;background:var(--navy);color:#fff}
+button:hover{background:#082a55}
+button.ghost{background:#fff;color:var(--navy);border:1px solid var(--navy)}
+button.ghost:hover{background:var(--sky)}
+button.danger{background:var(--bad)}
+button.small{padding:6px 11px;font-size:12px}
+button:disabled{opacity:.55;cursor:not-allowed}
+input,select,textarea{width:100%;padding:10px 12px;font-size:14px;border:1px solid var(--line);border-radius:8px;font-family:inherit;background:#fff;color:var(--text)}
+input:focus,select:focus,textarea:focus{outline:2px solid #9cc2ee;border-color:#9cc2ee}
+label{display:block;font-size:12px;font-weight:bold;color:var(--muted);margin:0 0 5px}
+
+/* ---------- login ---------- */
+#loginView{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.login-wrap{display:flex;width:100%;max-width:900px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 10px 40px rgba(11,58,117,.18)}
+.login-side{flex:1.05;background:linear-gradient(145deg,#0b3a75,#1e63b5);color:#fff;padding:44px 34px;display:flex;flex-direction:column;justify-content:center}
+.login-side .logo{width:64px;height:64px;border-radius:50%;background:#fff;color:var(--navy);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:bold;border:3px solid var(--gold);margin-bottom:18px}
+.login-side h1{margin:0 0 6px;font-size:28px}
+.login-side p{margin:0;opacity:.85;line-height:1.5;font-size:14px}
+.login-side ul{margin:22px 0 0;padding-left:18px;font-size:13px;line-height:1.9;opacity:.92}
+.login-form{flex:1;padding:40px 34px}
+.seg{display:flex;background:var(--sky);border-radius:10px;padding:4px;margin-bottom:22px}
+.seg button{flex:1;background:transparent;color:var(--navy);padding:9px}
+.seg button.on{background:var(--navy);color:#fff}
+.field{margin-bottom:14px}
+.err{color:var(--bad);font-size:13px;margin:10px 0 0;min-height:18px}
+.hint{font-size:12px;color:var(--muted);margin-top:14px;line-height:1.5}
+
+/* ---------- app shell ---------- */
+.top{background:#fff;border-bottom:1px solid var(--line)}
+.top-in{max-width:1180px;margin:0 auto;padding:12px 18px;display:flex;align-items:center;gap:14px}
+.brand{display:flex;align-items:center;gap:12px;flex:1}
+.brand .logo{width:46px;height:46px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:22px;border:2px solid var(--gold)}
+.brand b{display:block;font-size:17px;color:var(--navy);letter-spacing:.3px}
+.brand span{font-size:12px;color:var(--muted)}
+.chip{display:flex;align-items:center;gap:9px;font-size:13px}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--sky);color:var(--navy);font-weight:bold;display:flex;align-items:center;justify-content:center}
+nav.tabs{background:linear-gradient(90deg,#0b3a75,#1e63b5)}
+.tabs-in{max-width:1180px;margin:0 auto;display:flex;overflow-x:auto;padding:0 10px}
+.tabs-in button{background:transparent;border-radius:0;color:#e6efff;padding:15px 24px;font-size:14px;white-space:nowrap;border-bottom:3px solid transparent}
+.tabs-in button:hover{background:rgba(255,255,255,.1)}
+.tabs-in button.on{background:rgba(255,255,255,.16);color:#fff;border-bottom-color:#fff}
+main{max-width:1180px;margin:0 auto;padding:24px 18px 36px}
+footer{border-top:1px solid var(--line);background:#fff;text-align:center;font-size:12px;color:var(--muted);padding:14px}
+
+.title-row{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+.title-row h2{margin:0;font-size:24px;color:#111c33;letter-spacing:.2px}
+.title-row select.sel{width:auto;min-width:170px}
+.grid{display:grid;grid-template-columns:1fr 310px;gap:20px;align-items:start}
+.cards2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px}
+.stat{border-radius:16px;padding:22px;background:linear-gradient(135deg,#e3eefc,#f4f8ff);border:1px solid #cfe0f6;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:150px}
+.stat .big{font-size:28px;font-weight:bold;color:#111c33}
+.stat .sub{font-size:13px;color:var(--muted);margin-top:8px;display:flex;align-items:center;gap:7px}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;box-shadow:var(--shadow);margin-bottom:20px}
+.card h3{margin:0 0 14px;font-size:16px;color:#111c33}
+.side .card{padding:16px}
+.table-wrap{overflow-x:auto}
+table.t{width:100%;border-collapse:collapse;font-size:13px}
+table.t th{background:#eaf1fa;color:#233450;text-align:left;padding:11px 10px;font-weight:bold;white-space:nowrap}
+table.t td{padding:11px 10px;border-bottom:1px solid #eef2f7}
+table.t tr:nth-child(even) td{background:#f5f9fe}
+table.t .n{text-align:center}
+table.t tr.total td{font-weight:bold;background:#eaf1fa}
+.pass{color:var(--ok);font-weight:bold}.fail{color:var(--bad);font-weight:bold}
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:bold}
+.badge.ok{background:#dff5e9;color:var(--ok)}.badge.bad{background:#fde5e2;color:var(--bad)}.badge.gray{background:#eceff4;color:#55627a}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.notice{padding:11px 0;border-bottom:1px solid #eef2f7}
+.notice:last-child{border-bottom:0}
+.notice b{font-size:13px;display:block;color:#162540}
+.notice small{color:var(--muted);font-size:11px}
+.notice p{margin:4px 0 0;font-size:12px;color:#44506a;line-height:1.45}
+.empty{color:var(--muted);font-size:13px;padding:8px 0}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:12px 24px}
+.kv div{border-bottom:1px solid #eef2f7;padding-bottom:8px}
+.kv small{display:block;color:var(--muted);font-size:11px;margin-bottom:3px}
+.kv span{font-size:14px;font-weight:bold}
+.form-row{display:flex;gap:12px;flex-wrap:wrap}.form-row>div{flex:1;min-width:170px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px}
+.toolbar>div{min-width:150px}
+
+/* admin stats */
+.stats4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+.mini{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow)}
+.mini small{color:var(--muted);font-size:12px}
+.mini b{display:block;font-size:28px;color:var(--navy);margin-top:6px}
+.bar{display:flex;align-items:center;gap:10px;margin:9px 0;font-size:13px}
+.bar .lbl{width:150px;flex:none}
+.bar .track{flex:1;background:#eaf1fa;border-radius:6px;height:14px;overflow:hidden}
+.bar .fill{height:100%;background:linear-gradient(90deg,#1e63b5,#5aa0f0);border-radius:6px}
+
+/* marksheet */
+.sheet-head{text-align:center;border-bottom:3px solid var(--gold);padding-bottom:12px;margin-bottom:16px}
+.sheet-head h2{margin:0;color:var(--navy);font-size:26px}
+.sheet-head p{margin:5px 0 0;color:var(--muted);font-size:13px}
+table.info{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:13px}
+table.info td{border:1px solid var(--line);padding:8px 10px}
+table.info td.k{background:#eef3fa;font-weight:bold;width:17%}
+.sumrow{display:flex;gap:12px;margin:18px 0 6px;flex-wrap:wrap}
+.sumrow .box{flex:1;min-width:120px;text-align:center;border:1px solid var(--line);border-radius:10px;padding:12px;background:#f8fafd}
+.sumrow .v{font-size:26px;font-weight:bold;color:var(--navy)}.sumrow .l{font-size:12px;color:var(--muted)}
+.sign{display:flex;justify-content:space-between;margin-top:34px;font-size:12px;color:var(--muted)}
+
+/* modal + toast */
+#modalBack{position:fixed;inset:0;background:rgba(10,25,50,.5);display:flex;align-items:center;justify-content:center;padding:18px;z-index:50}
+.modal{background:#fff;border-radius:14px;padding:24px;width:100%;max-width:560px;max-height:92vh;overflow:auto}
+.modal h3{margin:0 0 16px;color:var(--navy)}
+.modal .btns{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+#toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#11233f;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;z-index:60;max-width:90%}
+#toast.bad{background:var(--bad)}
+
+@media (max-width:900px){
+  .grid{grid-template-columns:1fr}.stats4{grid-template-columns:1fr 1fr}.cards2{grid-template-columns:1fr}
+  .login-wrap{flex-direction:column}.login-side{padding:28px}.kv{grid-template-columns:1fr}
+}
+@media print{
+  body{background:#fff}
+  body *{visibility:hidden}
+  .printable,.printable *{visibility:visible}
+  .printable{position:absolute;left:0;top:0;width:100%;border:0;box-shadow:none}
+  .noprint{display:none!important}
+  table.t th,table.info td.k,table.t tr.total td,.sumrow .box{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN ================= -->
+<div id="loginView">
+  <div class="login-wrap">
+    <div class="login-side">
+      <div class="logo">N</div>
+      <h1 class="uni">Nexora University</h1>
+      <p>Student Result Portal</p>
+      <ul>
+        <li>Semester-wise results</li>
+        <li>GPA and CGPA</li>
+        <li>Downloadable marksheet (PDF)</li>
+      </ul>
+    </div>
+    <div class="login-form">
+      <div class="seg">
+        <button id="segStudent" class="on" onclick="setLoginMode('student')">Student</button>
+        <button id="segAdmin" onclick="setLoginMode('admin')">Administrator</button>
+      </div>
+      <form id="studentForm" onsubmit="return doStudentLogin(event)">
+        <div class="field"><label>University Roll Number</label><input id="lRoll" placeholder="e.g. CS-24-001" autocomplete="off"></div>
+        <div class="field"><label>PIN</label><input id="lPin" type="password" placeholder="Enter your PIN" autocomplete="off"></div>
+        <button id="studentBtn" type="submit" style="width:100%">View My Result</button>
+        <div class="hint">Enter your roll number and the PIN given by the university to see your semester-wise results, GPA and CGPA.</div>
+      </form>
+      <form id="adminForm" class="hidden" onsubmit="return doAdminLogin(event)">
+        <div class="field"><label>Admin Username</label><input id="aUser" autocomplete="username"></div>
+        <div class="field"><label>Password</label><input id="aPass" type="password" autocomplete="current-password"></div>
+        <button id="adminBtn" type="submit" style="width:100%">Login as Administrator</button>
+      </form>
+      <div class="err" id="loginErr"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="appView" class="hidden">
+  <div class="top noprint"><div class="top-in">
+    <div class="brand"><div class="logo">N</div><div><b class="uni">Nexora University</b><span id="portalLabel">Student Portal</span></div></div>
+    <div class="chip"><div class="avatar" id="avatar">U</div><div><b id="whoName"></b><div style="font-size:11px;color:var(--muted)" id="whoRole"></div></div></div>
+    <button class="ghost small" onclick="logoutNow()">Logout</button>
+  </div></div>
+  <nav class="tabs noprint"><div class="tabs-in" id="nav"></div></nav>
+  <main id="page"></main>
+  <footer class="noprint"><span class="uni">Nexora University</span> - Student Result Portal. Results shown here are for information; the Examination Office record is final.</footer>
+</div>
+
+<div id="modalBack" class="hidden"><div class="modal" id="modal"></div></div>
+<div id="toast" class="hidden"></div>
+
+<script>
+/* Agar page Apps Script ke bahar (computer se) khula ho to calls web app URL par fetch se jati hain */
+var API_URL = 'https://script.google.com/macros/s/AKfycbx44LC9uWvdNNHVGVBs0j-GV6XvybTDg7CnpnwhbY6VxnCyo-x3GZKN0U2h8nL8IMAk/exec';
+if (typeof google === 'undefined' || !google.script) {
+  (function(){
+    function mk(ok, bad){
+      return new Proxy({}, { get:function(t, k){
+        if (k === 'withSuccessHandler') return function(f){ return mk(f, bad); };
+        if (k === 'withFailureHandler') return function(f){ return mk(ok, f); };
+        return function(){
+          var args = [].slice.call(arguments);
+          fetch(API_URL, { method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body:JSON.stringify({ fn:k, args:args }), redirect:'follow' })
+            .then(function(r){ return r.json(); })
+            .then(function(j){ if (j.error) throw new Error(j.error); if (ok) ok(j.data); })
+            .catch(function(e){
+              var msg = String(e && e.message || e);
+              if (/failed to fetch|networkerror|load failed/i.test(msg)) msg = 'Cannot reach the server. Check your internet and that the web app is deployed with access set to "Anyone".';
+              if (bad) bad(new Error(msg));
+            });
+        };
+      }});
+    }
+    window.google = { script:{ run:mk(null, null) } };
+  })();
+}
+</script>
+<script>
+var S = { role:null, token:null, student:null, overview:null, sem:null, result:null, page:null, admin:{} };
+
+/* ---------- helpers ---------- */
+function $(id){ return document.getElementById(id); }
+function el(tag, props){
+  var e = document.createElement(tag), pend = null; props = props || {};
+  for (var k in props){
+    var v = props[k];
+    if (k === 'class') e.className = v;
+    else if (k === 'text') e.textContent = v;
+    else if (k === 'value') pend = v;
+    else if (k.indexOf('on') === 0) e[k] = v;
+    else if (v !== null && v !== undefined && v !== false) e.setAttribute(k, v);
+  }
+  for (var i = 2; i < arguments.length; i++) add(e, arguments[i]);
+  if (pend !== null) e.value = pend;
+  return e;
+}
+function add(parent, c){
+  if (c === null || c === undefined || c === false) return;
+  if (Array.isArray(c)) { c.forEach(function(x){ add(parent, x); }); return; }
+  parent.appendChild(typeof c === 'object' ? c : document.createTextNode(String(c)));
+}
+function clear(node){ while (node.firstChild) node.removeChild(node.firstChild); return node; }
+function fmt(n){ return (n === null || n === undefined || n === '') ? '-' : Number(n).toFixed(2); }
+function call(fn){
+  var args = [].slice.call(arguments, 1);
+  return new Promise(function(resolve, reject){
+    var r = google.script.run.withSuccessHandler(resolve).withFailureHandler(reject);
+    r[fn].apply(r, args);
+  });
+}
+function fail(e){
+  var m = String((e && e.message) || e || 'Something went wrong.');
+  if (m.indexOf('SESSION_EXPIRED') >= 0){ toast('Session expired. Please log in again.', true); showLogin(); return; }
+  toast(m.replace(/^Error:\s*/, ''), true);
+}
+var toastTimer;
+function toast(msg, bad){
+  var t = $('toast'); t.textContent = msg; t.className = bad ? 'bad' : '';
+  clearTimeout(toastTimer); toastTimer = setTimeout(function(){ t.className = 'hidden'; }, 3800);
+}
+function busy(btn, on, label){ btn.disabled = on; if (label) btn.textContent = label; }
+function badge(status){ return el('span', { class:'badge ' + (String(status).toLowerCase() === 'fail' ? 'bad' : 'ok'), text:status }); }
+
+/* gauge (SVG from numbers only) */
+function gauge(val, max, size, stroke, color, arc, label){
+  var r = (size - stroke) / 2, c = 2 * Math.PI * r, len = c * arc, pct = Math.max(0, Math.min(1, (val || 0) / max)), cx = size / 2;
+  var rot = arc === 1 ? -90 : 90 + (360 - 360 * arc) / 2;
+  return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 ' + size + ' ' + size + '">' +
+    '<circle cx="' + cx + '" cy="' + cx + '" r="' + r + '" fill="none" stroke="#d5e1f0" stroke-width="' + stroke + '" stroke-linecap="round" stroke-dasharray="' + len + ' ' + c + '" transform="rotate(' + rot + ' ' + cx + ' ' + cx + ')"/>' +
+    '<circle cx="' + cx + '" cy="' + cx + '" r="' + r + '" fill="none" stroke="' + color + '" stroke-width="' + stroke + '" stroke-linecap="round" stroke-dasharray="' + (len * pct) + ' ' + c + '" transform="rotate(' + rot + ' ' + cx + ' ' + cx + ')"/>' +
+    (label ? '<text x="' + cx + '" y="' + (cx + 6) + '" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="' + Math.round(size / 6) + '" fill="#0b3a75">' + label + '</text>' : '') +
+    '</svg>';
+}
+function trendChart(list){
+  var w = 270, h = 130, n = list.length, bw = Math.min(34, (w - 20) / Math.max(n, 1) - 8), s = '<svg width="100%" viewBox="0 0 ' + w + ' ' + (h + 26) + '">';
+  s += '<line x1="8" y1="' + h + '" x2="' + (w - 8) + '" y2="' + h + '" stroke="#cfd9e8"/>';
+  list.forEach(function(x, i){
+    var bh = Math.round((x.gpa || 0) / 4 * (h - 22)), step = (w - 16) / n, bx = 8 + step * i + (step - bw) / 2;
+    s += '<rect x="' + bx + '" y="' + (h - bh) + '" width="' + bw + '" height="' + bh + '" rx="4" fill="#1e63b5"/>' +
+         '<text x="' + (bx + bw / 2) + '" y="' + (h - bh - 5) + '" text-anchor="middle" font-size="10" font-family="Arial" fill="#233450">' + fmt(x.gpa) + '</text>' +
+         '<text x="' + (bx + bw / 2) + '" y="' + (h + 16) + '" text-anchor="middle" font-size="10" font-family="Arial" fill="#667085">S' + Number(x.semester) + '</text>';
+  });
+  return s + '</svg>';
+}
+function b64Blob(b64, type){
+  var bin = atob(b64), a = new Uint8Array(bin.length);
+  for (var i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i);
+  return new Blob([a], { type:type });
+}
+function saveFile(res){
+  var url = URL.createObjectURL(b64Blob(res.base64, 'application/pdf'));
+  var a = document.createElement('a'); a.href = url; a.download = res.filename; document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); }, 1500);
+  toast('Marksheet downloaded: ' + res.filename);
+}
+
+/* ---------- modal ---------- */
+function openModal(title, fields, submitLabel, onSubmit){
+  var m = clear($('modal')), inputs = {}, err = el('div', { class:'err' });
+  var form = el('form', { onsubmit:function(ev){
+    ev.preventDefault();
+    var vals = {};
+    for (var k in inputs) vals[k] = inputs[k].value;
+    var btn = form.querySelector('button[type=submit]'); busy(btn, true);
+    onSubmit(vals).then(function(ok){ busy(btn, false); if (ok !== false) closeModal(); }).catch(function(e){ busy(btn, false); fail(e); });
+    return false;
+  }});
+  var row = el('div', { class:'form-row' });
+  fields.forEach(function(f){
+    var inp;
+    if (f.options) inp = el('select', f.readonly ? { disabled:'disabled' } : {}, f.options.map(function(o){ return el('option', { value:o, text:o === '' ? '-' : o }); }));
+    else if (f.type === 'textarea') inp = el('textarea', { rows:4 });
+    else inp = el('input', { type:f.type || 'text', placeholder:f.placeholder || '' });
+    if (f.readonly && !f.options) inp.setAttribute('readonly', 'readonly');
+    inp.value = f.value === undefined || f.value === null ? '' : f.value;
+    if (f.required) inp.setAttribute('required', 'required');
+    inputs[f.name] = inp;
+    row.appendChild(el('div', { style: f.wide ? 'flex:1 1 100%' : '' }, el('label', { text:f.label + (f.required ? ' *' : '') }), inp));
+  });
+  form.appendChild(row); form.appendChild(err);
+  form.appendChild(el('div', { class:'btns' }, el('button', { type:'button', class:'ghost', text:'Cancel', onclick:closeModal }), el('button', { type:'submit', text:submitLabel })));
+  m.appendChild(el('h3', { text:title })); m.appendChild(form);
+  $('modalBack').classList.remove('hidden');
+  var first = form.querySelector('input:not([readonly]),select:not([disabled])'); if (first) first.focus();
+}
+function closeModal(){ $('modalBack').classList.add('hidden'); }
+function infoModal(title, lines){
+  var m = clear($('modal'));
+  m.appendChild(el('h3', { text:title }));
+  lines.forEach(function(l){ m.appendChild(el('p', { text:l, style:'font-size:14px;line-height:1.5' })); });
+  m.appendChild(el('div', { class:'btns' }, el('button', { text:'OK', onclick:closeModal })));
+  $('modalBack').classList.remove('hidden');
+}
+
+/* ---------- boot / login ---------- */
+google.script.run.withSuccessHandler(function(i){
+  [].forEach.call(document.querySelectorAll('.uni'), function(n){ n.textContent = i.university; });
+  document.title = i.university + ' - Student Portal';
+}).getPublicInfo();
+
+function setLoginMode(m){
+  $('studentForm').classList.toggle('hidden', m !== 'student');
+  $('adminForm').classList.toggle('hidden', m !== 'admin');
+  $('segStudent').classList.toggle('on', m === 'student');
+  $('segAdmin').classList.toggle('on', m === 'admin');
+  $('loginErr').textContent = '';
+}
+function showLogin(){
+  S = { role:null, token:null, student:null, overview:null, sem:null, result:null, page:null, admin:{} };
+  closeModal();
+  $('appView').classList.add('hidden'); $('loginView').classList.remove('hidden');
+  $('aPass').value = ''; $('lPin').value = '';
+}
+function doStudentLogin(ev){
+  ev.preventDefault(); $('loginErr').textContent = '';
+  var b = $('studentBtn'); busy(b, true, 'Checking...');
+  call('loginStudent', $('lRoll').value, $('lPin').value).then(function(r){
+    busy(b, false, 'View My Result');
+    if (!r.ok){ $('loginErr').textContent = r.message; return; }
+    S.role = 'student'; S.token = r.token; S.student = r.student;
+    enterApp();
+  }).catch(function(e){ busy(b, false, 'View My Result'); $('loginErr').textContent = String(e.message || e); });
+  return false;
+}
+function doAdminLogin(ev){
+  ev.preventDefault(); $('loginErr').textContent = '';
+  var b = $('adminBtn'); busy(b, true, 'Signing in...');
+  call('loginAdmin', $('aUser').value, $('aPass').value).then(function(r){
+    busy(b, false, 'Login as Administrator');
+    if (!r.ok){ $('loginErr').textContent = r.message; return; }
+    S.role = 'admin'; S.token = r.token;
+    enterApp();
+  }).catch(function(e){ busy(b, false, 'Login as Administrator'); $('loginErr').textContent = String(e.message || e); });
+  return false;
+}
+function logoutNow(){ var t = S.token; call('logout', t).catch(function(){}); showLogin(); }
+
+function enterApp(){
+  $('loginView').classList.add('hidden'); $('appView').classList.remove('hidden');
+  var nav = clear($('nav')), tabs;
+  if (S.role === 'student'){
+    $('portalLabel').textContent = 'Student Portal';
+    $('whoName').textContent = S.student.name; $('whoRole').textContent = S.student.roll;
+    $('avatar').textContent = S.student.name.charAt(0).toUpperCase();
+    tabs = [['dashboard', 'Dashboard'], ['marksheet', 'Marksheet'], ['profile', 'Profile'], ['support', 'Support']];
+  } else {
+    $('portalLabel').textContent = 'Administration';
+    $('whoName').textContent = 'Administrator'; $('whoRole').textContent = 'Full access'; $('avatar').textContent = 'A';
+    tabs = [['overview', 'Overview'], ['students', 'Students'], ['results', 'Results'], ['notices', 'Announcements'], ['settings', 'Settings']];
+  }
+  tabs.forEach(function(t){ nav.appendChild(el('button', { id:'tab_' + t[0], text:t[1], onclick:function(){ go(t[0]); } })); });
+  if (S.role === 'student'){
+    clear($('page')).appendChild(el('div', { class:'empty', text:'Loading your results...' }));
+    call('studentOverview', S.token).then(function(o){
+      S.overview = o; S.student = o.student;
+      var sems = o.semesters; S.sem = sems.length ? sems[sems.length - 1].semester : null;
+      return S.sem ? call('studentResult', S.token, S.sem) : null;
+    }).then(function(r){ S.result = r && r.ok ? r : null; go('dashboard'); }).catch(fail);
+  } else go('overview');
+}
+function go(p){
+  S.page = p;
+  [].forEach.call($('nav').children, function(b){ b.classList.toggle('on', b.id === 'tab_' + p); });
+  var pg = clear($('page')); window.scrollTo(0, 0);
+  ({ dashboard:pageDashboard, marksheet:pageMarksheet, profile:pageProfile, support:pageSupport,
+     overview:pageOverview, students:pageStudents, results:pageResults, notices:pageNotices, settings:pageSettings })[p](pg);
+}
+
+/* ================= STUDENT PAGES ================= */
+function semSelect(onchange){
+  var sel = el('select', { class:'sel', onchange:function(){ onchange(Number(this.value)); } },
+    S.overview.semesters.map(function(x){ return el('option', { value:x.semester, text:'Semester ' + x.semester }); }));
+  sel.value = S.sem; return sel;
+}
+function changeSem(n){
+  S.sem = n;
+  call('studentResult', S.token, n).then(function(r){ S.result = r.ok ? r : null; go(S.page); }).catch(fail);
+}
+function downloadSem(btn){
+  busy(btn, true, 'Preparing PDF...');
+  call('downloadMarksheet', S.token, S.sem).then(function(r){
+    busy(btn, false, 'Download Marksheet (PDF)');
+    if (!r.ok) return toast(r.message, true); saveFile(r);
+  }).catch(function(e){ busy(btn, false, 'Download Marksheet (PDF)'); fail(e); });
+}
+function resultTable(r){
+  var rows = r.subjects.map(function(s){
+    return el('tr', {}, el('td', { text:s.code }), el('td', { text:s.subject }), el('td', { class:'n', text:s.credit }), el('td', { class:'n', text:s.total }),
+      el('td', { class:'n', text:s.obtained }), el('td', { class:'n', text:s.percentage === null ? '-' : s.percentage.toFixed(2) }),
+      el('td', { class:'n' }, el('b', { text:s.grade })), el('td', { class:'n', text:fmt(s.gradePoint) }),
+      el('td', { class:'n ' + (String(s.status).toLowerCase() === 'fail' ? 'fail' : 'pass'), text:s.status }));
+  });
+  rows.push(el('tr', { class:'total' }, el('td'), el('td', { text:'Total' }), el('td', { class:'n', text:r.totalCredits }), el('td', { class:'n', text:r.totalMarks }),
+    el('td', { class:'n', text:r.obtainedMarks }), el('td'), el('td'), el('td'), el('td')));
+  return el('div', { class:'table-wrap' }, el('table', { class:'t' },
+    el('thead', {}, el('tr', {}, ['Subject Code', 'Subject Name', 'Credits', 'Total Marks', 'Obtained', '%', 'Grade', 'GP', 'Status'].map(function(h, i){ return el('th', { class:i > 1 ? 'n' : '', text:h }); }))),
+    el('tbody', {}, rows)));
+}
+function noResult(pg){
+  pg.appendChild(el('div', { class:'card' }, el('h3', { text:'No results yet' }), el('div', { class:'empty', text:'No published results were found for your account. Please contact the Examination Office if you think this is a mistake.' })));
+}
+
+function pageDashboard(pg){
+  var o = S.overview, r = S.result;
+  if (!r) return noResult(pg);
+  pg.appendChild(el('div', { class:'title-row' }, el('h2', { text:S.student.program + ' - Semester ' + S.sem + ' Results' }), semSelect(changeSem)));
+  var g1 = el('div'); g1.innerHTML = gauge(r.gpa, 4, 84, 11, '#5aa0f0', 1, '');
+  var g2 = el('div'); g2.innerHTML = gauge(r.cgpa, 4, 130, 16, '#1e63b5', 0.75, 'CGPA');
+  var main = el('div', {},
+    el('div', { class:'cards2' },
+      el('div', { class:'stat' }, el('div', {}, el('div', { class:'big', text:'GPA: ' + fmt(r.gpa) }), el('div', { class:'sub' }, el('span', { class:'dot', style:'background:#5aa0f0' }), 'Current Semester (' + S.sem + ')')), g1),
+      el('div', { class:'stat' }, el('div', {}, el('div', { class:'big', text:'CGPA: ' + fmt(r.cgpa) }), el('div', { class:'sub' }, el('span', { class:'dot', style:'background:#1e63b5' }), 'Overall (Sem 1-' + S.sem + ')'), el('div', { class:'sub' }, badge(r.overall), 'Result')), g2)),
+    el('div', { class:'card' }, el('h3', { text:'Subject-wise Marks (Semester ' + S.sem + ')' }), resultTable(r),
+      el('div', { class:'actions' }, el('button', { text:'Download Marksheet (PDF)', onclick:function(){ downloadSem(this); } }), el('button', { class:'ghost', text:'Open Marksheet', onclick:function(){ go('marksheet'); } }))));
+  var notes = el('div', { class:'card' }, el('h3', { text:'Announcements' }));
+  if (!o.notices.length) notes.appendChild(el('div', { class:'empty', text:'No announcements.' }));
+  o.notices.forEach(function(n){ notes.appendChild(el('div', { class:'notice' }, el('b', { text:n.title }), el('small', { text:n.date }), n.message ? el('p', { text:n.message }) : null)); });
+  var tr = el('div', { class:'card' }, el('h3', { text:'GPA by Semester' })); var tc = el('div'); tc.innerHTML = trendChart(o.semesters); tr.appendChild(tc);
+  tr.appendChild(el('div', { class:'empty', text:'Overall CGPA: ' + fmt(o.cgpa) + '  |  Credits: ' + o.totalCredits }));
+  pg.appendChild(el('div', { class:'grid' }, main, el('div', { class:'side' }, notes, tr)));
+}
+
+function marksheetCard(r){
+  return el('div', { class:'card printable' },
+    el('div', { class:'sheet-head' }, el('h2', { text:r.university }), el('p', { text:'Statement of Marks - Semester ' + r.semester })),
+    el('table', { class:'info' },
+      el('tr', {}, el('td', { class:'k', text:'Student Name' }), el('td', { text:r.student.name }), el('td', { class:'k', text:'Roll No.' }), el('td', { text:r.student.roll })),
+      el('tr', {}, el('td', { class:'k', text:'Student ID' }), el('td', { text:r.student.studentId }), el('td', { class:'k', text:'Semester' }), el('td', { text:r.semester })),
+      el('tr', {}, el('td', { class:'k', text:'Program' }), el('td', { text:r.student.program }), el('td', { class:'k', text:'Department' }), el('td', { text:r.student.department }))),
+    resultTable(r),
+    el('div', { class:'sumrow' },
+      el('div', { class:'box' }, el('div', { class:'v', text:fmt(r.gpa) }), el('div', { class:'l', text:'GPA' })),
+      el('div', { class:'box' }, el('div', { class:'v', text:fmt(r.cgpa) }), el('div', { class:'l', text:'CGPA' })),
+      el('div', { class:'box' }, el('div', { class:'v', style:'color:' + (r.overall === 'Fail' ? '#c0392b' : '#16794a'), text:r.overall }), el('div', { class:'l', text:'Result' }))),
+    el('div', { class:'sign' }, el('span', { text:'Generated on ' + r.generatedOn + '. Computer-generated marksheet.' }), el('span', { text:'Controller of Examinations' })));
+}
+function pageMarksheet(pg){
+  var r = S.result; if (!r) return noResult(pg);
+  pg.appendChild(el('div', { class:'title-row noprint' }, el('h2', { text:'Marksheet' }), semSelect(changeSem)));
+  pg.appendChild(marksheetCard(r));
+  pg.appendChild(el('div', { class:'actions noprint' }, el('button', { text:'Download Marksheet (PDF)', onclick:function(){ downloadSem(this); } }), el('button', { class:'ghost', text:'Print', onclick:function(){ window.print(); } })));
+}
+function pageProfile(pg){
+  var s = S.student;
+  pg.appendChild(el('div', { class:'title-row' }, el('h2', { text:'My Profile' })));
+  var kv = el('div', { class:'kv' });
+  [['Full Name', s.name], ['Roll Number', s.roll], ['Student ID', s.studentId], ['Program', s.program], ['Department', s.department], ['Batch', s.batch || '-'], ['Email', s.email || '-'], ['Phone', s.phone || '-']]
+    .forEach(function(p){ kv.appendChild(el('div', {}, el('small', { text:p[0] }), el('span', { text:p[1] }))); });
+  pg.appendChild(el('div', { class:'card' }, el('h3', { text:'Student Details' }), kv));
+}
+function pageSupport(pg){
+  pg.appendChild(el('div', { class:'title-row' }, el('h2', { text:'Support' })));
+  pg.appendChild(el('div', { class:'card' }, el('h3', { text:'Need help?' }),
+    el('p', { style:'font-size:14px;line-height:1.7', text:'For corrections in marks, name or program details, please contact the Examination Office of your university with your roll number and student ID.' }),
+    el('p', { style:'font-size:14px;line-height:1.7', text:'GPA is calculated as the sum of (credit hours x grade point) divided by total credit hours. CGPA covers all semesters up to the selected one.' })));
+}
+
+/* ================= ADMIN PAGES ================= */
+function pageOverview(pg){
+  pg.appendChild(el('div', { class:'title-row' }, el('h2', { text:'Administrator Overview' }),
+    el('button', { class:'ghost', text:'Recalculate all grades', onclick:function(){
+      if (!confirm('Recalculate Grade and Result_Status for every record from the marks?')) return;
+      call('adminRecalculateGrades', S.token).then(function(r){ toast(r.message, !r.ok); go('overview'); }).catch(fail);
+    }})));
+  call('adminStats', S.token).then(function(d){
+    var max = Math.max.apply(null, d.byProgram.map(function(p){ return p.count; }).concat([1]));
+    var bars = el('div');
+    d.byProgram.forEach(function(p){ bars.appendChild(el('div', { class:'bar' }, el('div', { class:'lbl', text:p.program }), el('div', { class:'track' }, el('div', { class:'fill', style:'width:' + (p.count / max * 100) + '%' })), el('b', { text:p.count }))); });
+    var top = el('table', { class:'t' }, el('thead', {}, el('tr', {}, ['Roll No.', 'Name', 'Program', 'CGPA'].map(function(h){ return el('th', { text:h }); }))),
+      el('tbody', {}, d.top.map(function(t){ return el('tr', {}, el('td', { text:t.roll }), el('td', { text:t.name }), el('td', { text:t.program }), el('td', { text:fmt(t.cgpa) })); })));
+    pg.appendChild(el('div', { class:'stats4' },
+      el('div', { class:'mini' }, el('small', { text:'Total students' }), el('b', { text:d.totalStudents })),
+      el('div', { class:'mini' }, el('small', { text:'Result records' }), el('b', { text:d.totalRecords })),
+      el('div', { class:'mini' }, el('small', { text:'Subject pass rate' }), el('b', { text:d.passRate === null ? '-' : d.passRate + '%' })),
+      el('div', { class:'mini' }, el('small', { text:'Average CGPA' }), el('b', { text:fmt(d.avgCgpa) }))));
+    pg.appendChild(el('div', { class:'cards2' }, el('div', { class:'card' }, el('h3', { text:'Students by program' }), bars),
+      el('div', { class:'card' }, el('h3', { text:'Top performers (CGPA)' }), d.top.length ? el('div', { class:'table-wrap' }, top) : el('div', { class:'empty', text:'No data yet.' }))));
+  }).catch(fail);
+}
+
+function studentFields(s, isNew){
+  s = s || {};
+  return [
+    { name:'roll', label:'Roll Number', value:s.roll, required:true, readonly:!isNew },
+    { name:'studentId', label:'Student ID', value:s.studentId, required:true },
+    { name:'name', label:'Student Name', value:s.name, required:true, wide:true },
+    { name:'department', label:'Department', value:s.department, required:true },
+    { name:'program', label:'Program', value:s.program, required:true, placeholder:'e.g. BSCS, MBA' },
+    { name:'batch', label:'Batch', value:s.batch },
+    { name:'status', label:'Status', value:s.status || 'Active', options:['Active', 'Inactive'] },
+    { name:'email', label:'Email', value:s.email, type:'email' },
+    { name:'phone', label:'Phone', value:s.phone }
+  ];
+}
+function pageStudents(pg){
+  var search = el('input', { placeholder:'Search by name, roll or program...' });
+  var box = el('div');
+  pg.appendChild(el('div', { class:'title-row' }, el('h2', { text:'Student Records' }),
+    el('button', { text:'+ Add Student', onclick:function(){
+      openModal('Add Student', studentFields(null, true), 'Save Student', function(v){
+        return call('adminSaveStudent', S.token, v, true).then(function(r){ toast(r.message, !r.ok); if (r.ok) load(); return r.ok; });
+      });
+    }})));
+  pg.appendChild(el('div', { class:'card' }, el('div', { class:'toolbar' }, el('div', { style:'flex:1' }, search)), box));
+  var all = [];
+  function draw(){
+    var q = search.value.trim().toLowerCase();
+    var list = all.filter(function(s){ return !q || (s.name + ' ' + s.roll + ' ' + s.program + ' ' + s.department).toLowerCase().indexOf(q) >= 0; });
+    clear(box);
+    if (!list.length) return box.appendChild(el('div', { class:'empty', text:'No students found.' }));
+    box.appendChild(el('div', { class:'table-wrap' }, el('table', { class:'t' },
+      el('thead', {}, el('tr', {}, ['Roll No.', 'Student ID', 'Name', 'Program', 'Department', 'CGPA', 'Status', 'Actions'].map(function(h){ return el('th', { text:h }); }))),
+      el('tbody', {}, list.map(function(s){
+        return el('tr', {}, el('td', { text:s.roll }), el('td', { text:s.studentId }), el('td', { text:s.name }), el('td', { text:s.program }), el('td', { text:s.department }),
+          el('td', { text:fmt(s.cgpa) }), el('td', {}, el('span', { class:'badge ' + (s.status.toLowerCase() === 'inactive' ? 'gray' : 'ok'), text:s.status })),
+          el('td', { style:'white-space:nowrap' },
+            el('button', { class:'small ghost', text:'Edit', onclick:function(){
+              openModal('Edit Student', studentFields(s, false), 'Update', function(v){ return call('adminSaveStudent', S.token, v, false).then(function(r){ toast(r.message, !r.ok); if (r.ok) load(); return r.ok; }); });
+            }}), ' ',
+            el('button', { class:'small ghost', text:'Results', onclick:function(){ S.admin.rollFilter = s.roll; go('results'); } }), ' ',
+            el('button', { class:'small danger', text:'Delete', onclick:function(){
+              if (!confirm('Delete ' + s.name + ' and ALL their results? This cannot be undone.')) return;
+              call('adminDeleteStudent', S.token, s.roll).then(function(r){ toast(r.message, !r.ok); load(); }).catch(fail);
+            }})));
+      })))));
+  }
+  function load(){ call('adminListStudents', S.token).then(function(d){ all = d.students; draw(); }).catch(fail); }
+  search.oninput = draw; load();
+}
+
+function pageResults(pg){
+  var rollIn = el('input', { placeholder:'Roll number (blank = all)', value:S.admin.rollFilter || '' });
+  var semIn = el('select', {}, [''].concat([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]).map(function(n){ return el('option', { value:n, text:n === '' ? 'All semesters' : 'Semester ' + n }); }));
+  var box = el('div'), cur = { roll:'', sem:'' };
+  S.admin.rollFilter = '';
+  function resultFields(r, isNew){
+    r = r || {};
+    return [
+      { name:'roll', label:'Roll Number', value:r.roll || cur.roll, required:true, readonly:!isNew },
+      { name:'semester', label:'Semester', value:r.semester || cur.sem, type:'number', required:true, readonly:!isNew },
+      { name:'code', label:'Subject Code', value:r.code, required:true, readonly:!isNew },
+      { name:'subject', label:'Subject Name', value:r.subject, required:true },
+      { name:'credit', label:'Credit Hours', value:r.credit, type:'number', required:true },
+      { name:'total', label:'Total Marks', value:r.total === undefined ? 100 : r.total, type:'number', required:true },
+      { name:'obtained', label:'Obtained Marks', value:r.obtained, type:'number', required:true }
+    ];
+  }
+  function load(){
+    cur.roll = rollIn.value.trim(); cur.sem = semIn.value;
+    call('adminGetResults', S.token, cur.roll, cur.sem).then(function(d){
+      clear(box);
+      if (!d.rows.length) return box.appendChild(el('div', { class:'empty', text:'No result records found.' }));
+      if (d.total > d.rows.length) box.appendChild(el('div', { class:'empty', text:'Showing first ' + d.rows.length + ' of ' + d.total + ' records. Use the filters to narrow down.' }));
+      box.appendChild(el('div', { class:'table-wrap' }, el('table', { class:'t' },
+        el('thead', {}, el('tr', {}, ['Roll No.', 'Name', 'Sem', 'Code', 'Subject', 'Credits', 'Total', 'Obtained', 'Grade', 'Status', 'Actions'].map(function(h){ return el('th', { text:h }); }))),
+        el('tbody', {}, d.rows.map(function(r){
+          return el('tr', {}, el('td', { text:r.roll }), el('td', { text:r.name }), el('td', { text:r.semester }), el('td', { text:r.code }), el('td', { text:r.subject }),
+            el('td', { text:r.credit }), el('td', { text:r.total }), el('td', { text:r.obtained }), el('td', {}, el('b', { text:r.grade })), el('td', {}, badge(r.status)),
+            el('td', { style:'white-space:nowrap' },
+              el('button', { class:'small ghost', text:'Edit', onclick:function(){
+                openModal('Edit Result', resultFields(r, false), 'Update', function(v){ return call('adminSaveResult', S.token, v, false).then(function(x){ toast(x.message, !x.ok); if (x.ok) load(); return x.ok; }); });
+              }}), ' ',
+              el('button', { class:'small danger', text:'Delete', onclick:function(){
+                if (!confirm('Delete ' + r.code + ' for ' + r.roll + ' (semester ' + r.semester + ')?')) return;
+                call('adminDeleteResult', S.token, r.roll, r.semester, r.code).then(function(x){ toast(x.message, !x.ok); load(); }).catch(fail);
+              }})));
+        })))));
+    }).catch(fail);
+  }
+  pg.appendChild(el('div', { class:'title-row' }, el('h2', { text:'Result Management' }),
+    el('button', { text:'+ Add Result', onclick:function(){
+      openModal('Add Result', resultFields(null, true), 'Save Result', function(v){ return call('adminSaveResult', S.token, v, true).then(function(x){ toast(x.message, !x.ok); if (x.ok) load(); return x.ok; }); });
+    }})));
+  pg.appendChild(el('div', { class:'card' },
+    el('div', { class:'toolbar' }, el('div', {}, el('label', { text:'Roll Number' }), rollIn), el('div', {}, el('label', { text:'Semester' }), semIn),
+      el('button', { text:'Load', onclick:load }),
+      el('button', { class:'ghost', text:'Download Marksheet', onclick:function(){
+        if (!rollIn.value.trim() || !semIn.value) return toast('Enter a roll number and choose a semester first.', true);
+        var b = this; busy(b, true);
+        call('adminDownloadMarksheet', S.token, rollIn.value.trim(), semIn.value).then(function(r){ busy(b, false); if (!r.ok) toast(r.message, true); else saveFile(r); }).catch(function(e){ busy(b, false); fail(e); });
+      }})),
+    box));
+  load();
+}
+
+function pageNotices(pg){
+  var t = el('input', { placeholder:'Title' }), m = el('textarea', { rows:3, placeholder:'Message (optional)' }), list = el('div');
+  function load(){
+    call('adminListNotices', S.token).then(function(d){
+      clear(list); if (!d.notices.length) list.appendChild(el('div', { class:'empty', text:'No announcements yet.' }));
+      d.notices.forEach(function(n){
+        list.appendChild(el('div', { class:'notice', style:'display:flex;gap:12px;justify-content:space-between;align-items:flex-start' },
+          el('div', {}, el('b', { text:n.title }), el('small', { text:n.date }), n.message ? el('p', { text:n.message }) : null),
+          el('button', { class:'small danger', text:'Delete', onclick:function(){ call('adminDeleteNotice', S.token, n.row).then(function(r){ toast(r.message, !r.ok); load(); }).catch(fail); } })));
+      });
+    }).catch(fail);
+  }
+  pg.appendChild(el('div', { class:'title-row' }, el('h2', { text:'Announcements' })));
+  pg.appendChild(el('div', { class:'card' }, el('h3', { text:'New announcement' }), el('div', { class:'field' }, el('label', { text:'Title' }), t), el('div', { class:'field' }, el('label', { text:'Message' }), m),
+    el('button', { text:'Publish', onclick:function(){
+      call('adminSaveNotice', S.token, t.value, m.value).then(function(r){ toast(r.message, !r.ok); if (r.ok){ t.value = ''; m.value = ''; load(); } }).catch(fail);
+    }})));
+  pg.appendChild(el('div', { class:'card' }, el('h3', { text:'Published' }), list));
+  load();
+}
+
+function pageSettings(pg){
+  pg.appendChild(el('div', { class:'title-row' }, el('h2', { text:'Settings' })));
+  pg.appendChild(el('div', { class:'card' }, el('h3', { text:'Notes' }),
+    el('p', { style:'font-size:14px;line-height:1.7', text:'Student PIN and admin password are set at the top of Code.gs (STUDENT_PIN and ADMIN_PASSWORD). After changing them, deploy a new version.' }),
+    el('p', { style:'font-size:14px;line-height:1.7', text:'Grading scale and grade points are defined in Code.gs (GRADE_SCALE). If you change the scale, use "Recalculate all grades" on the Overview page.' }),
+    el('p', { style:'font-size:14px;line-height:1.7', text:'You can also edit the Students and result tabs directly in the Google Sheet. Keep the header row unchanged.' })));
+}
+</script>
+</body>
+</html>
